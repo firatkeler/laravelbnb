@@ -20,10 +20,23 @@ class Booking extends Model
         return $this->hasOne(Review::class);
     }
 
+    public function address() {
+        return $this->belongsTo(Address::class);
+    }
+
     public function scopeBetweenDates(Builder $query, $from, $to) {
 //        return $query->where('to', '>=', $from)->where('from', '<=', $to);
-        return $query->where('from', '<=', $from)->where('to', '>=', $from)
-            ->where('from', '<=', $to)->where('to', '>=', $to);
+//        return $query->where('from', '<=', $from)->where('to', '>=', $from)
+//            ->where('from', '<=', $to)->where('to', '>=', $to);
+        return $query->where(function($query) use($from, $to) {
+            $query->where([
+                ['from', '<=', $from],
+                ['to', '>=', $from]
+            ])->orWhere([
+                ['from', '<=', $to],
+                ['to', '>=', $to]
+            ]);
+        });
     }
 
     public static function findByReviewKey(string $reviewKey): ?Booking {

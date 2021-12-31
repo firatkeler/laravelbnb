@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Bookable extends Model
 {
@@ -22,6 +23,20 @@ class Bookable extends Model
 //        return $this->bookings()->where('to', '>=', $from)->where('from', '<=', $to)->count();
 //        return $this->bookings()->where('from', '<=', $from)->where('to', '>=', $from)
 //            ->where('from', '<=', $to)->where('to', '>=', $to)->count();
-        return $this->bookings()->betweenDates($from, $to)->count();
+
+        return $this->bookings()->betweenDates($from, $to)->count() == 0;
+    }
+
+    public function priceFor($from, $to): array {
+        $days = (new Carbon($from))->diffInDays(new Carbon($to)) + 1;
+
+        $price = $this->price * $days;
+
+        return [
+            'total' => $price,
+            'breakdown' => [
+                $this->price => $days
+            ]
+        ];
     }
 }
